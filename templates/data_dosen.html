@@ -1,0 +1,358 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- Tambahkan Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2"><span class="text-muted fw-light">Data Master /</span> Data Dosen</h4>
+    <hr class="my-2" />
+
+    {% for category, message in messages %}
+    {% if category == 'danger' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+        style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+        style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Responsive Table -->
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Data Dosen</h5>
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahDosen">
+                <i class="bx bx-plus"></i> Tambah
+            </button>
+
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr class="text-nowrap">
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>NIP</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>No HP</th>
+                        <th>Alamat</th>
+                        <th>Jabatan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data_dosen %}
+                    {% for dosen in data_dosen %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ dosen.nama }}</td>
+                        <td>{{ dosen.nip }}</td>
+                        <td>{{ dosen.email }}</td>
+                        <td>******</td> <!-- Sembunyikan password -->
+                        <td>{{ dosen.no_hp }}</td>
+                        <td>{{ dosen.alamat }}</td>
+                        <td>{{ dosen.jabatan }}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-detail" data-bs-toggle="modal"
+                                data-bs-target="#modalDetailDosen" data-nama="{{ dosen.nama }}"
+                                data-nip="{{ dosen.nip }}" data-email="{{ dosen.email }}" data-no_hp="{{ dosen.no_hp }}"
+                                data-alamat="{{ dosen.alamat }}" data-jabatan="{{ dosen.jabatan }}">
+                                <i class="bx bx-show me-2"></i> Detail
+                            </button>
+                            <button type="button" class="btn btn-warning btn-edit" data-bs-toggle="modal"
+                                data-bs-target="#modalEditDosen" data-id="{{ dosen.id }}" data-nama="{{ dosen.nama }}"
+                                data-nip="{{ dosen.nip }}" data-email="{{ dosen.email }}" data-no_hp="{{ dosen.no_hp }}"
+                                data-alamat="{{ dosen.alamat }}" data-jabatan="{{ dosen.jabatan }}">
+                                <i class="bx bx-edit-alt me-2"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-delete" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-id="{{ dosen.id }}">
+                                <i class="bx bx-trash me-2"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No data available</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Dosen -->
+<div class="modal fade" id="modalTambahDosen" tabindex="-1" aria-labelledby="modalTambahDosenLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambahDosenLabel">Tambah Dosen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTambahDosen" action="{{ url_for('dosen') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="">
+
+                    <!-- Nama Dosen -->
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama Dosen</label>
+                        <input type="text" class="form-control" id="nama" name="nama" required>
+                    </div>
+
+                    <!-- NIP -->
+                    <div class="mb-3">
+                        <label for="nip" class="form-label">NIP</label>
+                        <input type="text" class="form-control" id="nip" name="nip" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- No HP -->
+                    <div class="mb-3">
+                        <label for="no_hp" class="form-label">No HP</label>
+                        <input type="text" class="form-control" id="no_hp" name="no_hp" required>
+                    </div>
+
+                    <!-- Alamat -->
+                    <div class="mb-3">
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamat" name="alamat" required></textarea>
+                    </div>
+
+                    <!-- Jabatan -->
+                    <div class="mb-3">
+                        <label for="jabatan" class="form-label">Jabatan</label>
+                        <input type="text" class="form-control" id="jabatan" name="jabatan">
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Dosen -->
+<div class="modal fade" id="modalDetailDosen" tabindex="-1" aria-labelledby="modalDetailDosenLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetailDosenLabel">Detail Dosen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Nama</th>
+                        <td id="detail_nama"></td>
+                    </tr>
+                    <tr>
+                        <th>NIP</th>
+                        <td id="detail_nip"></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td id="detail_email"></td>
+                    </tr>
+                    <tr>
+                        <th>No HP</th>
+                        <td id="detail_no_hp"></td>
+                    </tr>
+                    <tr>
+                        <th>Alamat</th>
+                        <td id="detail_alamat"></td>
+                    </tr>
+                    <tr>
+                        <th>Jabatan</th>
+                        <td id="detail_jabatan"></td>
+                    </tr>
+                </table>
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Dosen -->
+<div class="modal fade" id="modalEditDosen" tabindex="-1" aria-labelledby="modalEditDosenLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditDosenLabel">Edit Dosen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditDosen" action="" method="POST">
+                    <input type="hidden" id="edit_id" name="id">
+
+                    <div class="mb-3">
+                        <label for="edit_nama" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="edit_nama" name="nama" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_nip" class="form-label">NIP</label>
+                        <input type="text" class="form-control" id="edit_nip" name="nip" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_no_hp" class="form-label">No HP</label>
+                        <input type="text" class="form-control" id="edit_no_hp" name="no_hp" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="edit_alamat" name="alamat" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_jabatan" class="form-label">Jabatan</label>
+                        <input type="text" class="form-control" id="edit_jabatan" name="jabatan">
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let detailButtons = document.querySelectorAll(".btn-detail");
+
+        detailButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                document.getElementById("detail_nama").textContent = this.getAttribute("data-nama");
+                document.getElementById("detail_nip").textContent = this.getAttribute("data-nip");
+                document.getElementById("detail_email").textContent = this.getAttribute("data-email");
+                document.getElementById("detail_no_hp").textContent = this.getAttribute("data-no_hp");
+                document.getElementById("detail_alamat").textContent = this.getAttribute("data-alamat");
+                document.getElementById("detail_jabatan").textContent = this.getAttribute("data-jabatan");
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let editButtons = document.querySelectorAll(".btn-edit");
+
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                let nama = this.getAttribute("data-nama");
+                let nip = this.getAttribute("data-nip");
+                let email = this.getAttribute("data-email");
+                let no_hp = this.getAttribute("data-no_hp");
+                let alamat = this.getAttribute("data-alamat");
+                let jabatan = this.getAttribute("data-jabatan");
+
+                document.getElementById("formEditDosen").action = `/edit-dosen/${id}`;
+                document.getElementById("edit_id").value = id;
+                document.getElementById("edit_nama").value = nama;
+                document.getElementById("edit_nip").value = nip;
+                document.getElementById("edit_email").value = email;
+                document.getElementById("edit_no_hp").value = no_hp;
+                document.getElementById("edit_alamat").value = alamat;
+                document.getElementById("edit_jabatan").value = jabatan;
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let deleteButtons = document.querySelectorAll(".btn-delete");
+
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                let deleteForm = document.getElementById("deleteForm");
+                deleteForm.action = `/delete-dosen/${id}`;
+            });
+        });
+    });
+</script>
+<!-- JavaScript untuk Hide/Show Password -->
+<script>
+    document.getElementById("togglePassword").addEventListener("click", function () {
+        var passwordInput = document.getElementById("password");
+        var icon = this.querySelector("i");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    });
+</script>
+
+{% endblock %}

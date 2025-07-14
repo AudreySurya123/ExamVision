@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2">Detail Ujian</h4>
+    <hr class="my-2" />
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Informasi Ujian</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Nama Ujian</th>
+                        <td>{{ ujian.nama_ujian }}</td>
+                    </tr>
+                    <tr>
+                        <th>Matakuliah</th>
+                        <td>{{ ujian.nama_mk }}</td>
+                    </tr>
+                    <tr>
+                        <th>Kelas</th>
+                        <td>{{ ujian.nama_kelas }}</td>
+                    </tr>
+                    <tr>
+                        <th>Acak Soal</th>
+                        <td>{{ 'Ya' if ujian.acak_soal else 'Tidak' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Waktu Mulai</th>
+                        <td>{{ ujian.waktu_mulai }}</td>
+                    </tr>
+                    <tr>
+                        <th>Waktu Selesai</th>
+                        <td>{{ ujian.waktu_selesai }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <a href="{{ url_for('manajemen_ujian') }}" class="btn btn-primary">Kembali ke Manajemen Ujian</a>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Soal Ujian</h5>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            {% if category == 'danger' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert"
+                style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% elif category == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert"
+                style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <a href="{{ url_for('tambah_soal', ujian_id=ujian.id) }}" class="btn btn-primary mb-3">
+                Tambah Soal
+            </a>
+            <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No</th>
+                        <th>Soal</th>
+                        <th style="width: 150px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for soal in soal_list %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>
+                            <div>
+                                {{ soal.soal }}
+                                <hr>
+                                <div>
+                                    A. {{ soal.pilihan_a }}<br>
+                                    B. {{ soal.pilihan_b }}<br>
+                                    C. {{ soal.pilihan_c }}<br>
+                                    D. {{ soal.pilihan_d }}<br>
+                                    E. {{ soal.pilihan_e }}<br>
+                                    {% if soal.jawaban_benar == 'a' %}
+                                    <span style="color: rgb(94, 94, 255); font-weight: bold;">Jawaban Benar: A</span>
+                                    {% elif soal.jawaban_benar == 'b' %}
+                                    <span style="color: rgb(94, 94, 255); font-weight: bold;">Jawaban Benar: B</span>
+                                    {% elif soal.jawaban_benar == 'c' %}
+                                    <span style="color: rgb(94, 94, 255); font-weight: bold;">Jawaban Benar: C</span>
+                                    {% elif soal.jawaban_benar == 'd' %}
+                                    <span style="color: rgb(94, 94, 255); font-weight: bold;">Jawaban Benar: D</span>
+                                    {% elif soal.jawaban_benar == 'e' %}
+                                    <span style="color: rgb(94, 94, 255); font-weight: bold;">Jawaban Benar: E</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('edit_soal', id=soal.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="{{ url_for('delete_soal', id=soal.id) }}" method="POST"
+                                style="display:inline;" onsubmit="return confirmDelete();">
+                                <input type="hidden" name="ujian_id" value="{{ ujian.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">Tidak ada soal yang ditambahkan.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        return confirm("Apakah Anda yakin ingin menghapus soal ini?");
+    }
+</script>
+
+{% endblock %}

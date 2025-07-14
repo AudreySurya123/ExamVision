@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    {% set messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="mb-4">
+        {% for category, message in messages %}
+        {% if category == 'danger' %}
+        <div class="alert alert-dismissible fade show" role="alert"
+            style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important; border-radius: 5px; margin-bottom: 20px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% elif category == 'success' %}
+        <div class="alert alert-dismissible fade show" role="alert"
+            style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important; border-radius: 5px; margin-bottom: 20px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% else %}
+        <div class="alert alert-dismissible fade show" role="alert" style="border-radius: 5px; margin-bottom: 20px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h4 class="fw-bold py-3 mb-4">Dosen Dashboard</h4>
+    <hr class="my-2" />
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Ujian</h5>
+                    <h3 class="card-text">{{ total_ujian }}</h3>
+                    <small class="text-muted">Ujian yang dibuat</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Proctoring</h5>
+                    <h3 class="card-text">{{ total_proctoring }}</h3>
+                    <small class="text-muted">Data proctoring yang terdaftar</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

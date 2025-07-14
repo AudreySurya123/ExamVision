@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2">Hasil Ujian Mahasiswa</h4>
+    <hr class="my-2" />
+
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Hasil Ujian</h5>
+        </div>
+
+        <!-- FORM PENCARIAN -->
+        <form method="GET" class="p-3">
+            <div class="input-group" style="max-width: 400px;">
+                <input type="text" class="form-control" name="search" placeholder="Cari Mahasiswa / Ujian / Kelas..."
+                    value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-primary" type="submit">Cari</button>
+            </div>
+        </form>
+
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Mahasiswa</th>
+                        <th>Kelas</th>
+                        <th>Ujian</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if results %}
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ result.mahasiswa_nama }}</td>
+                        <td>{{ result.kelas_name }}</td>
+                        <td>{{ result.nama_ujian }}</td>
+                        <td>{{ result.score }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Tidak ada hasil ujian yang tersedia.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

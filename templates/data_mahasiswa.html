@@ -1,0 +1,424 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- Tambahkan Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2"><span class="text-muted fw-light">Data Master /</span> Data Mahasiswa</h4>
+    <hr class="my-2" />
+
+    {% for category, message in messages %}
+    {% if category == 'danger' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+        style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+        style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Responsive Table -->
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Data Mahasiswa</h5>
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahMahasiswa">
+                <i class="bx bx-plus"></i> Tambah
+            </button>
+
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr class="text-nowrap">
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>NIM</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>No HP</th>
+                        <th>Alamat</th>
+                        <th>Prodi</th>
+                        <th>Kelas</th> <!-- New column for Kelas -->
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data_mahasiswa %}
+                    {% for mahasiswa in data_mahasiswa %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ mahasiswa.nama }}</td>
+                        <td>{{ mahasiswa.nim }}</td>
+                        <td>{{ mahasiswa.email }}</td>
+                        <td>******</td> <!-- Sembunyikan password -->
+                        <td>{{ mahasiswa.no_hp }}</td>
+                        <td>{{ mahasiswa.alamat }}</td>
+                        <td>{{ mahasiswa.prodi }}</td>
+                        <td>{{ mahasiswa.kelas_nama }}</td> <!-- Displaying the kelas name -->
+                        <td>
+                            <button type="button" class="btn btn-info btn-detail" data-bs-toggle="modal"
+                                data-bs-target="#modalDetailMahasiswa" data-nama="{{ mahasiswa.nama }}"
+                                data-nim="{{ mahasiswa.nim }}" data-email="{{ mahasiswa.email }}"
+                                data-no_hp="{{ mahasiswa.no_hp }}" data-alamat="{{ mahasiswa.alamat }}"
+                                data-prodi="{{ mahasiswa.prodi }}" data-kelas="{{ mahasiswa.kelas_nama }}">
+                                <!-- Add data-kelas -->
+                                <i class="bx bx-show me-2"></i> Detail
+                            </button>
+                            <button type="button" class="btn btn-warning btn-edit" data-bs-toggle="modal"
+                                data-bs-target="#modalEditMahasiswa" data-id="{{ mahasiswa.id }}"
+                                data-nama="{{ mahasiswa.nama }}" data-nim="{{ mahasiswa.nim }}"
+                                data-email="{{ mahasiswa.email }}" data-no_hp="{{ mahasiswa.no_hp }}"
+                                data-alamat="{{ mahasiswa.alamat }}" data-prodi="{{ mahasiswa.prodi }}"
+                                data-kelas-id="{{ mahasiswa.kelas_id }}"> <!-- Add this line -->
+                                <i class="bx bx-edit-alt me-2"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-delete" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-id="{{ mahasiswa.id }}">
+                                <i class="bx bx-trash me-2"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center">No data available</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Mahasiswa -->
+<div class="modal fade" id="modalTambahMahasiswa" tabindex="-1" aria-labelledby="modalTambahMahasiswaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambahMahasiswaLabel">Tambah Mahasiswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTambahMahasiswa" action="{{ url_for('mahasiswa') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="">
+
+                    <!-- Nama Mahasiswa -->
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama Mahasiswa</label>
+                        <input type="text" class="form-control" id="nama" name="nama" required>
+                    </div>
+
+                    <!-- NIM -->
+                    <div class="mb-3">
+                        <label for="nim" class="form-label">NIM</label>
+                        <input type="text" class="form-control" id="nim" name="nim" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- No HP -->
+                    <div class="mb-3">
+                        <label for="no_hp" class="form-label">No HP</label>
+                        <input type="text" class="form-control" id="no_hp" name="no_hp" required>
+                    </div>
+
+                    <!-- Alamat -->
+                    <div class="mb-3">
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamat" name="alamat" required></textarea>
+                    </div>
+
+                    <!-- Program Studi -->
+                    <div class="mb-3">
+                        <label for="prodi" class="form-label">Program Studi</label>
+                        <input type="text" class="form-control" id="prodi" name="prodi" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kelas" class="form-label">Kelas</label>
+                        <select class="form-select" id="kelas" name="kelas" required>
+                            <option value="" disabled selected>Pilih Kelas</option>
+                            {% for kelas in kelas_data %}
+                            <option value="{{ kelas.id }}">{{ kelas.kelas }}</option>
+                            <!-- Assuming 'id' and 'nama' are the fields -->
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Mahasiswa -->
+<div class="modal fade" id="modalDetailMahasiswa" tabindex="-1" aria-labelledby="modalDetailMahasiswaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetailMahasiswaLabel">Detail Mahasiswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Nama</th>
+                        <td id="detail_nama"></td>
+                    </tr>
+                    <tr>
+                        <th>NIM</th>
+                        <td id="detail_nim"></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td id="detail_email"></td>
+                    </tr>
+                    <tr>
+                        <th>No HP</th>
+                        <td id="detail_no_hp"></td>
+                    </tr>
+                    <tr>
+                        <th>Alamat</th>
+                        <td id="detail_alamat"></td>
+                    </tr>
+                    <tr>
+                        <th>Prodi</th>
+                        <td id="detail_prodi"></td>
+                    </tr>
+                    <tr>
+                        <th>Kelas</th> <!-- Add this row -->
+                        <td id="detail_kelas"></td> <!-- Add this cell -->
+                    </tr>
+                </table>
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Mahasiswa -->
+<div class="modal fade" id="modalEditMahasiswa" tabindex="-1" aria-labelledby="modalEditMahasiswaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditMahasiswaLabel">Edit Mahasiswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditMahasiswa" action="" method="POST">
+                    <input type="hidden" id="edit_id" name="id">
+
+                    <div class="mb-3">
+                        <label for="edit_nama" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="edit_nama" name="nama" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_nim" class="form-label">nim</label>
+                        <input type="text" class="form-control" id="edit_nim" name="nim" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_no_hp" class="form-label">No HP</label>
+                        <input type="text" class="form-control" id="edit_no_hp" name="no_hp" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="edit_alamat" name="alamat" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_prodi" class="form-label">Prodi</label>
+                        <input type="text" class="form-control" id="edit_prodi" name="prodi">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_kelas" class="form-label">Kelas</label>
+                        <select class="form-select" id="edit_kelas" name="kelas" required>
+                            <option value="" disabled>Pilih Kelas</option>
+                            {% for kelas in kelas_data %}
+                            <option value="{{ kelas.id }}">{{ kelas.kelas }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const detailButtons = document.querySelectorAll(".btn-detail");
+
+        detailButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                // Get data attributes
+                const nama = this.getAttribute("data-nama");
+                const nim = this.getAttribute("data-nim");
+                const email = this.getAttribute("data-email");
+                const no_hp = this.getAttribute("data-no_hp");
+                const alamat = this.getAttribute("data-alamat");
+                const prodi = this.getAttribute("data-prodi");
+                const kelas = this.getAttribute("data-kelas"); // New attribute for Kelas
+
+                // Set the modal content
+                document.getElementById("detail_nama").textContent = nama;
+                document.getElementById("detail_nim").textContent = nim;
+                document.getElementById("detail_email").textContent = email;
+                document.getElementById("detail_no_hp").textContent = no_hp;
+                document.getElementById("detail_alamat").textContent = alamat;
+                document.getElementById("detail_prodi").textContent = prodi;
+                document.getElementById("detail_kelas").textContent = kelas; // Set Kelas
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const editButtons = document.querySelectorAll(".btn-edit");
+
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                document.getElementById("edit_id").value = this.getAttribute("data-id");
+                document.getElementById("edit_nama").value = this.getAttribute("data-nama");
+                document.getElementById("edit_nim").value = this.getAttribute("data-nim");
+                document.getElementById("edit_email").value = this.getAttribute("data-email");
+                document.getElementById("edit_no_hp").value = this.getAttribute("data-no_hp");
+                document.getElementById("edit_alamat").value = this.getAttribute("data-alamat");
+                document.getElementById("edit_prodi").value = this.getAttribute("data-prodi");
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let editButtons = document.querySelectorAll(".btn-edit");
+
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                let nama = this.getAttribute("data-nama");
+                let nim = this.getAttribute("data-nim");
+                let email = this.getAttribute("data-email");
+                let no_hp = this.getAttribute("data-no_hp");
+                let alamat = this.getAttribute("data-alamat");
+                let prodi = this.getAttribute("data-prodi");
+
+                document.getElementById("formEditMahasiswa").action = `/edit-mahasiswa/${id}`;
+                document.getElementById("edit_id").value = id;
+                document.getElementById("edit_nama").value = nama;
+                document.getElementById("edit_nim").value = nim;
+                document.getElementById("edit_email").value = email;
+                document.getElementById("edit_no_hp").value = no_hp;
+                document.getElementById("edit_alamat").value = alamat;
+                document.getElementById("edit_prodi").value = prodi;
+                // Set selected kelas
+                const kelasId = this.getAttribute("data-kelas-id");  // Add this attribute in your button
+                document.getElementById("edit_kelas").value = kelasId;
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let deleteButtons = document.querySelectorAll(".btn-delete");
+
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                let deleteForm = document.getElementById("deleteForm");
+                deleteForm.action = `/delete-mahasiswa/${id}`;
+            });
+        });
+    });
+</script>
+<!-- JavaScript untuk Hide/Show Password -->
+<script>
+    document.getElementById("togglePassword").addEventListener("click", function () {
+        var passwordInput = document.getElementById("password");
+        var icon = this.querySelector("i");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    });
+</script>
+
+{% endblock %}

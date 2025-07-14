@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2">Edit Soal</h4>
+    <hr class="my-2" />
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="soal" class="form-label">Soal</label>
+                    <textarea class="form-control" id="soal" name="soal" rows="3" required>{{ soal.soal }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pilihan_a" class="form-label">Pilihan A</label>
+                    <input type="text" class="form-control" id="pilihan_a" name="pilihan_a" value="{{ soal.pilihan_a }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pilihan_b" class="form-label">Pilihan B</label>
+                    <input type="text" class="form-control" id="pilihan_b" name="pilihan_b" value="{{ soal.pilihan_b }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pilihan_c" class="form-label">Pilihan C</label>
+                    <input type="text" class="form-control" id="pilihan_c" name="pilihan_c" value="{{ soal.pilihan_c }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="pilihan_d" class="form-label">Pilihan D</label>
+                    <input type="text" class="form-control" id="pilihan_d" name="pilihan_d" value="{{ soal.pilihan_d }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="pilihan_e" class="form-label">Pilihan E</label>
+                    <input type="text" class="form-control" id="pilihan_e" name="pilihan_e" value="{{ soal.pilihan_e }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="jawaban_benar" class="form-label">Jawaban Benar</label>
+                    <select class="form-select" id="jawaban_benar" name="jawaban_benar" required>
+                        <option value="a" {% if soal.jawaban_benar == 'a' %}selected{% endif %}>A</option>
+                        <option value="b" {% if soal.jawaban_benar == 'b' %}selected{% endif %}>B</option>
+                        <option value="c" {% if soal.jawaban_benar == 'c' %}selected{% endif %}>C</option>
+                        <option value="d" {% if soal.jawaban_benar == 'd' %}selected{% endif %}>D</option>
+                        <option value="e" {% if soal.jawaban_benar == 'e' %}selected{% endif %}>E</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="bobot_nilai" class="form-label">Bobot Nilai</label>
+                    <input type="number" class="form-control" id="bobot_nilai" name="bobot_nilai" value="{{ soal.bobot_nilai }}" required>
+                </div>
+
+                <input type="hidden" name="ujian_id" value="{{ soal.ujian_id }}">
+                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                <a href="{{ url_for('tambah_ujian', id=soal.ujian_id) }}" class="btn btn-secondary">Kembali</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

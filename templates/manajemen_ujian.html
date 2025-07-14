@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2">Manajemen Ujian</h4>
+    <hr class="my-2" />
+
+    {% for category, message in messages %}
+    {% if category == 'danger' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+        style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+        style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Manajemen Ujian</h5>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahUjian">
+                <i class="bx bx-plus"></i> Tambah
+            </button>
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Ujian</th>
+                        <th>Matakuliah</th>
+                        <th>Kelas</th>
+                        <th>Waktu Mulai</th>
+                        <th>Waktu Selesai</th>
+                        <th>Acak Soal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data_ujian %}
+                    {% for ujian in data_ujian %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ ujian.nama_ujian }}</td>
+                        <td>{{ ujian.nama_mk }}</td>
+                        <td>{{ ujian.nama_kelas }}</td>
+                        <td>{{ ujian.waktu_mulai }}</td>
+                        <td>{{ ujian.waktu_selesai }}</td>
+                        <td>{{ 'Ya' if ujian.acak_soal else 'Tidak' }}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/tambah-ujian/{{ ujian.id }}'">
+                                <i class="bx bx-plus me-2"></i> Tambah
+                            </button>
+                            <button type="button" class="btn btn-warning btn-edit" data-bs-toggle="modal"
+                                data-bs-target="#modalEditUjian" data-id="{{ ujian.id }}"
+                                data-nama="{{ ujian.nama_ujian }}" data-matakuliah_id="{{ ujian.matakuliah_id }}"
+                                data-kelas_id="{{ ujian.kelas_id }}"
+                                data-waktu_mulai="{{ ujian.waktu_mulai|replace(' ', 'T') }}"
+                                data-waktu_selesai="{{ ujian.waktu_selesai|replace(' ', 'T') }}"
+                                data-acak_soal="{{ 'Ya' if ujian.acak_soal else 'Tidak' }}">
+                                <i class="bx bx-edit-alt me-2"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-delete" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-id="{{ ujian.id }}">
+                                <i class="bx bx-trash me-2"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center">No data available</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Ujian -->
+<div class="modal fade" id="modalTambahUjian" tabindex="-1" aria-labelledby="modalTambahUjianLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambahUjianLabel">Tambah Ujian</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('manajemen_ujian') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="nama_ujian" class="form-label">Nama Ujian</label>
+                        <input type="text" class="form-control" id="nama_ujian" name="nama_ujian" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="matakuliah_id" class="form-label">Matakuliah</label>
+                        <select class="form-select" id="matakuliah_id" name="matakuliah_id" required>
+                            {% for mk in mata_kuliah %}
+                            <option value="{{ mk.id }}">{{ mk.nama_mk }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kelas_id" class="form-label">Kelas</label>
+                        <select class="form-select" id="kelas_id" name="kelas_id" required>
+                            {% for kelas in kelas_data %}
+                            <option value="{{ kelas.id }}">{{ kelas.kelas }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="waktu_mulai" class="form-label">Waktu Mulai</label>
+                        <input type="datetime-local" class="form-control" id="waktu_mulai" name="waktu_mulai" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="waktu_selesai" class="form-label">Waktu Selesai</label>
+                        <input type="datetime-local" class="form-control" id="waktu_selesai" name="waktu_selesai" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="acak_soal" class="form-label">Acak Soal</label>
+                        <select class="form-select" id="acak_soal" name="acak_soal">
+                            <option value="Ya">Ya</option>
+                            <option value="Tidak">Tidak</option>
+                        </select>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Ujian -->
+<div class="modal fade" id="modalEditUjian" tabindex="-1" aria-labelledby="modalEditUjianLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditUjianLabel">Edit Ujian</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditUjian" method="POST">
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="mb-3">
+                        <label for="edit_nama_ujian" class="form-label">Nama Ujian</label>
+                        <input type="text" class="form-control" id="edit_nama_ujian" name="nama_ujian" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_matakuliah_id" class="form-label">Matakuliah</label>
+                        <select class="form-select" id="edit_matakuliah_id" name="matakuliah_id" required>
+                            {% for mk in mata_kuliah %}
+                            <option value="{{ mk.id }}">{{ mk.nama_mk }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_kelas_id" class="form-label">Kelas</label>
+                        <select class="form-select" id="edit_kelas_id" name="kelas_id" required>
+                            {% for kelas in kelas_data %}
+                            <option value="{{ kelas.id }}">{{ kelas.kelas }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_waktu_mulai" class="form-label">Waktu Mulai</label>
+                        <input type="datetime-local" class="form-control" id="edit_waktu_mulai" name="waktu_mulai" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_waktu_selesai" class="form-label">Waktu Selesai</label>
+                        <input type="datetime-local" class="form-control" id="edit_waktu_selesai" name="waktu_selesai" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_acak_soal" class="form-label">Acak Soal</label>
+                        <select class="form-select" id="edit_acak_soal" name="acak_soal">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Edit button
+        let editButtons = document.querySelectorAll(".btn-edit");
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const id = this.dataset.id;
+                document.getElementById("edit_id").value = id;
+                document.getElementById("edit_nama_ujian").value = this.dataset.nama;
+                document.getElementById("edit_matakuliah_id").value = this.dataset.matakuliah_id;
+                document.getElementById("edit_kelas_id").value = this.dataset.kelas_id;
+                document.getElementById("edit_waktu_mulai").value = this.dataset.waktu_mulai;
+                document.getElementById("edit_waktu_selesai").value = this.dataset.waktu_selesai;
+                document.getElementById("edit_acak_soal").value = this.dataset.acak_soal;
+
+                // Set form action for editing
+                document.getElementById("formEditUjian").action = `/edit-ujian/${id}`;
+            });
+        });
+
+        // Delete button
+        let deleteButtons = document.querySelectorAll(".btn-delete");
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                document.getElementById("deleteForm").action = `/delete-ujian/${this.dataset.id}`;
+            });
+        });
+    });
+</script>
+
+{% endblock %}

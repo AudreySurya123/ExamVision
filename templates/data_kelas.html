@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2"><span class="text-muted fw-light">Data Master /</span> Data Kelas</h4>
+    <hr class="my-2" />
+
+    {% for category, message in messages %}
+    {% if category == 'danger' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+        style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+        style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Responsive Table -->
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Data Kelas</h5>
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahKelas">
+                <i class="bx bx-plus"></i> Tambah
+            </button>
+
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr class="text-nowrap">
+                        <th>No</th>
+                        <th>Kelas</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data_kelas %}
+                    {% for kelas in data_kelas %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ kelas.kelas }}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-detail" data-kelas="{{ kelas.kelas }}">
+                                <i class="bx bx-show me-2"></i> Detail
+                            </button>
+                            <button type="button" class="btn btn-warning btn-edit" data-bs-toggle="modal"
+                                data-bs-target="#modalEditKelas" data-id="{{ kelas.id }}" data-kelas="{{ kelas.kelas }}">
+                                <i class="bx bx-edit-alt me-2"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-delete" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-id="{{ kelas.id }}">
+                                <i class="bx bx-trash me-2"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No data available</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Kelas -->
+<div class="modal fade" id="modalTambahKelas" tabindex="-1" aria-labelledby="modalTambahKelasLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambahKelasLabel">Tambah Kelas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <hr>
+            <div class="modal-body">
+                <form id="formTambahKelas" action="{{ url_for('kelas') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="">
+
+                    <!-- Field Nama Kelas -->
+                    <div class="mb-3">
+                        <label for="nama_kelas" class="form-label">Nama Kelas</label>
+                        <input type="text" class="form-control" id="nama_kelas" name="kelas" required>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Kelas -->
+<div class="modal fade" id="modalDetailKelas" tabindex="-1" aria-labelledby="modalDetailKelasLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetailKelasLabel">Detail Kelas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Nama Kelas</th>
+                        <td id="detail_nama_kelas"></td>
+                    </tr>
+                </table>
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Kelas -->
+<div class="modal fade" id="modalEditKelas" tabindex="-1" aria-labelledby="modalEditKelasLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditKelasLabel">Edit Kelas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditKelas" method="POST">
+                    <input type="hidden" id="edit_id" name="id">
+
+                    <div class="mb-3">
+                        <label for="edit_nama_kelas" class="form-label">Nama Kelas</label>
+                        <input type="text" class="form-control" id="edit_nama_kelas" name="kelas" required>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let detailButtons = document.querySelectorAll(".btn-detail");
+
+        detailButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let kelas = this.getAttribute("data-kelas");
+                document.getElementById("detail_nama_kelas").innerText = kelas;
+
+                let modal = new bootstrap.Modal(document.getElementById("modalDetailKelas"));
+                modal.show();
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let editButtons = document.querySelectorAll(".btn-edit");
+
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                let kelas = this.getAttribute("data-kelas");
+
+                document.getElementById("edit_nama_kelas").value = kelas;
+                document.getElementById("formEditKelas").action = `/edit-kelas/${id}`;
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let deleteButtons = document.querySelectorAll(".btn-delete");
+
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                document.getElementById("deleteForm").action = `/delete-kelas/${id}`;
+            });
+        });
+    });
+</script>
+{% endblock %}

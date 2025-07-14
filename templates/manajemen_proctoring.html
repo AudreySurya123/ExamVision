@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2">Manajemen Proctoring</h4>
+    <hr class="my-2" />
+
+    {% for category, message in messages %}
+    {% if category == 'danger' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+        style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+        style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Manajemen Proctoring</h5>
+        </div>
+
+        <form method="GET" class="p-3">
+            <div class="input-group" style="max-width: 400px;">
+                <input type="text" class="form-control" name="search" placeholder="Cari Mahasiswa / Ujian / Kelas..."
+                    value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-primary" type="submit">Cari</button>
+            </div>
+        </form>
+
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Mahasiswa</th>
+                        <th>Kelas</th>
+                        <th>Nama Ujian</th>
+                        <th>Waktu</th>
+                        <th>Bentuk Kecurangan</th>
+                        <th>Bukti</th>
+                        <th>Action</th> <!-- New column for actions -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data_proctoring %}
+                    {% for p in data_proctoring %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ p.user_name }}</td>
+                        <td>{{ p.kelas_name }}</td>
+                        <td>{{ p.ujian_name }}</td>
+                        <td>{{ p.waktu }}</td>
+                        <td>{{ p.bentuk_kecurangan }}</td>
+                        <td>
+                            <img src="{{ p.bukti }}" alt="Bukti Kecurangan"
+                                style="width: 80px; height: auto; cursor: pointer;" data-bs-toggle="modal"
+                                data-bs-target="#imageModal{{ loop.index }}">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-delete" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-id="{{ p.id }}">
+                                <i class="bx bx-trash me-2"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="imageModal{{ loop.index }}" tabindex="-1"
+                        aria-labelledby="imageModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="imageModalLabel">Bukti Kecurangan</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <img src="{{ p.bukti }}" alt="Bukti Kecurangan" class="img-fluid"
+                                        style="max-width: 100%; height: auto;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="confirmDeleteModal" tabindex="-1"
+                        aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Apakah Anda yakin ingin menghapus data ini?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Batal</button>
+                                    <form id="deleteForm" method="POST" action="">
+                                        <button type="submit" class="btn btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No data available</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        const deleteForm = document.getElementById('deleteForm');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                deleteForm.action = `/delete-proctoring/${id}`; // Adjust this URL if necessary
+            });
+        });
+    });
+</script>
+
+{% endblock %}

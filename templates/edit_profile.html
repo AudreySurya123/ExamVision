@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Edit Profile</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="nama" class="form-label">Nama</label>
+            <input type="text" class="form-control" id="nama" name="nama" value="{{ user['nama'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user['email'] }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="no_hp" class="form-label">No HP</label>
+            <input type="text" class="form-control" id="no_hp" name="no_hp" value="{{ user['no_hp'] }}">
+        </div>
+        <div class="mb-3">
+            <label for="alamat" class="form-label">Alamat</label>
+            <textarea class="form-control" id="alamat" name="alamat" rows="3">{{ user['alamat'] }}</textarea>
+        </div>
+
+        <hr>
+        <h4>Ubah Password (Opsional)</h4>
+        <div class="mb-3">
+            <label for="current_password" class="form-label">Password Saat Ini</label>
+            <input type="password" class="form-control" id="current_password" name="current_password">
+        </div>
+        <div class="mb-3">
+            <label for="new_password" class="form-label">Password Baru</label>
+            <input type="password" class="form-control" id="new_password" name="new_password">
+        </div>
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Perbarui Profil</button>
+    </form>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Kembali ke Dashboard</a>
+</div>
+{% endblock %}

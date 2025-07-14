@@ -1,0 +1,257 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-2"><span class="text-muted fw-light">Data Master /</span> Data Mata Kuliah</h4>
+    <hr class="my-2" />
+
+    {% for category, message in messages %}
+    {% if category == 'danger' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+        style="background-color: rgb(195, 0, 0) !important; color: white !important; border: 1px solid #fa2929 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+        style="background-color: rgb(0, 195, 26) !important; color: white !important; border: 1px solid #29fa98 !important;">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% else %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Responsive Table -->
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center px-3 pb-2">
+            <h5 class="card-header mb-0">Data Mata Kuliah</h5>
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahMataKuliah">
+                <i class="bx bx-plus"></i> Tambah
+            </button>
+
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr class="text-nowrap">
+                        <th>No</th>
+                        <th>Kode Mata Kuliah</th>
+                        <th>Nama Mata Kuliah</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data_mk %}
+                    {% for mk in data_mk %}
+                    <tr>
+                        <td>{{ loop.index }}</td> <!-- loop.index memberikan nomor urut mulai dari 1 -->
+                        <td>{{ mk.kode_mk }}</td>
+                        <td>{{ mk.nama_mk }}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-detail" data-kode="{{ mk.kode_mk }}"
+                                data-nama="{{ mk.nama_mk }}">
+                                <i class="bx bx-show me-2"></i> Detail
+                            </button>
+                            <button type="button" class="btn btn-warning btn-edit" data-bs-toggle="modal"
+                                data-bs-target="#modalEditMataKuliah" data-id="{{ mk.id }}" data-kode="{{ mk.kode_mk }}"
+                                data-nama="{{ mk.nama_mk }}">
+                                <i class="bx bx-edit-alt me-2"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-delete" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-id="{{ mk.id }}">
+                                <i class="bx bx-trash me-2"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No data available</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Tambah Mata Kuliah -->
+<div class="modal fade" id="modalTambahMataKuliah" tabindex="-1" aria-labelledby="modalTambahMataKuliahLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambahMataKuliahLabel">Tambah Mata Kuliah</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <hr>
+            <div class="modal-body">
+                <form id="formTambahMataKuliah" action="{{ url_for('matkul') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="">
+
+                    <!-- Field Kode Mata Kuliah -->
+                    <div class="mb-3">
+                        <label for="kode_mk" class="form-label">Kode Mata Kuliah</label>
+                        <input type="text" class="form-control" id="kode_mk" name="kode_mk" required>
+                    </div>
+
+                    <!-- Field Nama Mata Kuliah -->
+                    <div class="mb-3">
+                        <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
+                        <input type="text" class="form-control" id="nama_mk" name="nama_mk" required>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Mata Kuliah -->
+<div class="modal fade" id="modalDetailMataKuliah" tabindex="-1" aria-labelledby="modalDetailMataKuliahLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetailMataKuliahLabel">Detail Mata Kuliah</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Kode Mata Kuliah</th>
+                        <td id="detail_kode_mk"></td>
+                    </tr>
+                    <tr>
+                        <th>Nama Mata Kuliah</th>
+                        <td id="detail_nama_mk"></td>
+                    </tr>
+                </table>
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Mata Kuliah -->
+<div class="modal fade" id="modalEditMataKuliah" tabindex="-1" aria-labelledby="modalEditMataKuliahLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditMataKuliahLabel">Edit Mata Kuliah</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditMataKuliah" method="POST">
+                    <input type="hidden" id="edit_id" name="id">
+
+                    <div class="mb-3">
+                        <label for="edit_kode_mk" class="form-label">Kode Mata Kuliah</label>
+                        <input type="text" class="form-control" id="edit_kode_mk" name="kode_mk" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_nama_mk" class="form-label">Nama Mata Kuliah</label>
+                        <input type="text" class="form-control" id="edit_nama_mk" name="nama_mk" required>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Ambil semua tombol "Detail"
+        let detailButtons = document.querySelectorAll(".btn-detail");
+
+        detailButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                // Ambil data dari atribut data-* yang diset di tombol
+                let kodeMk = this.getAttribute("data-kode");
+                let namaMk = this.getAttribute("data-nama");
+
+                // Masukkan data ke dalam modal
+                document.getElementById("detail_kode_mk").innerText = kodeMk;
+                document.getElementById("detail_nama_mk").innerText = namaMk;
+
+                // Tampilkan modal
+                let modal = new bootstrap.Modal(document.getElementById("modalDetailMataKuliah"));
+                modal.show();
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let editButtons = document.querySelectorAll(".btn-edit");
+
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                let kodeMk = this.getAttribute("data-kode");
+                let namaMk = this.getAttribute("data-nama");
+
+                document.getElementById("edit_kode_mk").value = kodeMk;
+                document.getElementById("edit_nama_mk").value = namaMk;
+
+                document.getElementById("formEditMataKuliah").action = `/edit-mk/${id}`;
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let deleteButtons = document.querySelectorAll(".btn-delete");
+
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                let id = this.getAttribute("data-id");
+                document.getElementById("deleteForm").action = `/delete-mk/${id}`;
+            });
+        });
+    });
+</script>
+{% endblock %}
