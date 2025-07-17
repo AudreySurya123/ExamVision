@@ -111,6 +111,18 @@ def login():
         username = request.form['email']
         password = request.form['password']
 
+        # Hardcoded admin credentials
+        admin_email = "admin@gmail.com"  # Change to your admin email
+        admin_password = "admin12345"         # Change to your admin password
+
+        if username == admin_email and password == admin_password:
+            session['role'] = 'admin'
+            session['nama'] = 'Admin'
+            session['email'] = admin_email
+            session['id'] = 1  # Assuming admin ID is 1; adjust as necessary
+            
+            return redirect(url_for('dashboard'))
+
         cur = mysql.cursor(dictionary=True)
         cur.execute("SELECT id, nama, email, role, password, kelas_id FROM users WHERE email = %s", (username,))
         user = cur.fetchone()
