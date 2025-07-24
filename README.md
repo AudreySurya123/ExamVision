@@ -41,6 +41,7 @@ pip freeze > requirements.txt
 💾 Database & Migrasi
 
 bash
+pip install mysql-connector-python
 mysql -u root -p
 
 Lalu masuk database mysql
@@ -48,6 +49,11 @@ CREATE DATABASE proctoring_ujian;
 USE proctoring_ujian;
 
 Masukkan query
+CREATE TABLE kelas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    kelas VARCHAR(50)
+);
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama VARCHAR(100),
@@ -68,11 +74,6 @@ CREATE TABLE mata_kuliah (
     id INT AUTO_INCREMENT PRIMARY KEY,
     kode_mk VARCHAR(50),
     nama_mk VARCHAR(100)
-);
-
-CREATE TABLE kelas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    kelas VARCHAR(50)
 );
 
 CREATE TABLE ujian (
