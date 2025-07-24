@@ -8,7 +8,7 @@ Proyek ini merupakan sistem ujian online berbasis web yang dilengkapi dengan fit
 
 🎥 Live Kamera Ujian dengan deteksi otomatis
 🧠 Deteksi perilaku mencurigakan berbasis YOLOv11
-📸 Perekaman bukti pelanggaran (snapshot) ke dalam database
+📸 Perekaman bukti pelanggaran (captures) ke dalam database
 👤 Manajemen akun pengguna (admin, dosen, mahasiswa)
 📄 Sistem soal & ujian online berbasis web dengan navigasi per soal
 🔀 Opsi acak soal
