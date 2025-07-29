@@ -78,13 +78,15 @@ CREATE TABLE mata_kuliah (
 
 CREATE TABLE ujian (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nama_ujian VARCHAR(100),
+    nama_ujian VARCHAR(255),
     matakuliah_id INT,
-    kelas_id INT,
-    acak_soal ENUM('Ya', 'Tidak') DEFAULT 'Tidak',
+    acak_soal ENUM('ya', 'tidak') DEFAULT 'tidak',
     waktu_mulai DATETIME,
     waktu_selesai DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    kelas_id INT,
     dosen_id INT,
+    is_submitted TINYINT(1) DEFAULT 0,
     FOREIGN KEY (matakuliah_id) REFERENCES mata_kuliah(id),
     FOREIGN KEY (kelas_id) REFERENCES kelas(id),
     FOREIGN KEY (dosen_id) REFERENCES users(id)
